@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+
+      #pac-input {
+        border: 1px; 
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+    <script>
+      var map;
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 23.634501, lng: -102.552784},
+          zoom: 6
+        });
+      }
+      var input = document.getElementById('pac-input');
+      var searchbox = new google.maps.places.SearchBox(input);
+      map.addListener('bounds_changed', () => {
+        searchbox.setBounds(map.getBounds());
+      });
+
+      searchbox.addListener('places_changed', () => {
+        var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+      });
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzynaY7B9KXAxdWlHUrJcj9U81GAXu_ag&callback=initMap"
+    async defer></script>
+  </body>
+</html>
