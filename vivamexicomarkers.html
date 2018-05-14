@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+  <title>Placing Customized Markers</title>
+    <style>
+      /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+      #map {
+        height: 100%;
+      }
+      /* Optional: Makes the sample page fill the window. */
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <script>
+      function initService() {
+        var mapoptions = {
+          center: {lat: 23.634501, lng: -102.552784},
+          zoom: 6
+        }
+
+        var map = new google.maps.Map(document.getElementById('map'), mapoptions);
+
+        var locations = getLocationsData();
+
+        for(var i = 0; i < locations.length; i++){
+          var fillcolor;
+          var circle;
+          var location =  new google.maps.LatLng(locations[i].latitude, locations[i].longitude);
+
+          if (locations[i].radius > 0){
+            fillcolor = 'orange';
+            circle = createCircle(map, location, fillcolor, locations[i].radius);
+          }else{
+            fillcolor = 'blue';
+          }
+
+          var iconoptions = {
+            path: google.maps.SymbolPath.CIRCLE,
+            strokeColor: fillcolor,
+            strokeWeight: 8,
+            fillOpacity: 10,
+            scale: 5
+          }
+
+          var marker = new google.maps.Marker({
+            position: location,
+            icon: iconoptions,
+            map: map
+          });
+
+          if (locations[i].radius > 0){
+            addmarkerlisteners(marker, circle);
+          }
+        }
+      }
+
+    //creates a new circle for a marker
+    function createCircle(map, location, fillcolor, radius){
+      return new google.maps.Circle({
+        strokeColor: fillcolor,
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: fillcolor,
+        fillOpacity: 0.35,
+        map: map,
+        center: location,
+        radius: radius,
+        visible: false
+      });
+    }
+
+    //adding event listeners to the mar
+    function addmarkerlisteners(marker, circle){
+      marker.addListener('mouseover', () => {
+        circle.setOptions({visible: true});
+      });
+
+      marker.addListener('mouseout', () => {
+        circle.setOptions({visible: false});
+      });
+    }
+
+    function getLocationsData()
+    {
+      return [
+        {
+          "id": 398957613,
+          "email": "797b591cbcb1dba7ef06f81dcb6453c0@hotmail.com",
+          "cid": 1098,
+          "lid": 10276,
+          "latitude": 19.429746155601617,
+          "longitude": -99.18818120000003,
+          "radius": 0
+        },
+        {
+          "id": 401459733,
+          "email": "5053aec5979d16bd7385464942c84487@hotmail.com",
+          "cid": 1097,
+          "lid": 14290,
+          "latitude": 19.438656673163283,
+          "longitude": -99.19038296640929,
+          "radius": 0
+        },
+        {
+          "id": 408002793,
+          "email": "3c2369c1b87bfd6d8bed874d6ad92010@yahoo.com",
+          "cid": 1097,
+          "lid": 14319,
+          "latitude": 19.4340199,
+          "longitude": -99.1956012,
+          "radius": 2000
+        },
+        {
+          "id": 409466010,
+          "email": "500b9fd7d3cafa6f8e50b359bfc036ab@gmail.com",
+          "cid": 1097,
+          "lid": 14319,
+          "latitude": 19.430958055525537,
+          "longitude": -99.19291753547361,
+          "radius": 750
+        },
+        {
+          "id": 427291767,
+          "email": "d441a12e57ea1442938e6b14efd2002f@gmail.com",
+          "cid": 1097,
+          "lid": 14319,
+          "latitude": 19.43744592966224,
+          "longitude": -99.21218080895386,
+          "radius": 1000
+        },
+        {
+          "id": 428648196,
+          "email": "d1b39f5e49192054c612a84c845aff05@yahoo.com",
+          "cid": 1098,
+          "lid": 14319,
+          "latitude": 19.43438935560305,
+          "longitude": -99.18751395000004,
+          "radius": 2000
+        },
+        {
+          "id": 430214565,
+          "email": "9177b72cbd1f9effcfdd463681b02d2b@gmail.com",
+          "cid": 1098,
+          "lid": 14319,
+          "latitude": 19.4340199,
+          "longitude": -99.1956012,
+          "radius": 2000
+        },
+        {
+          "id": 430298733,
+          "email": "9177b72cbd1f9effcfdd463681b02d2b@gmail.com",
+          "cid": 1098,
+          "lid": 14319,
+          "latitude": 19.4340199,
+          "longitude": -99.1956012,
+          "radius": 2000
+        },
+        {
+          "id": 432714777,
+          "email": "405146d2f3c8ad2c34dd025c778ae12e@gmail.com",
+          "cid": 1097,
+          "lid": 14319,
+          "latitude": 19.432196356078954,
+          "longitude": -99.19392464999999,
+          "radius": 2000
+        },
+        {
+          "id": 433479996,
+          "email": "eeee3329ad6ad70da83adff6681a761a@gmail.com",
+          "cid": 1098,
+          "lid": 14319,
+          "latitude": 19.4332785056027,
+          "longitude": -99.18413469999996,
+          "radius": 0
+        },
+        {
+          "id": 436723692,
+          "email": "9d38f2c01c27a2c6cd368507882f9cb6@gmail.com",
+          "cid": 1098,
+          "lid": 14273,
+          "latitude": 19.431528005602164,
+          "longitude": -99.17906640000001,
+          "radius": 0
+        },
+        {
+          "id": 437363592,
+          "email": "9177b72cbd1f9effcfdd463681b02d2b@gmail.com",
+          "cid": 1098,
+          "lid": 14319,
+          "latitude": 19.4340199,
+          "longitude": -99.1956012,
+          "radius": 2000
+        },
+        {
+          "id": 437840988,
+          "email": "801dd9038994d6d6b2ff8527cd6658cf@gmail.com",
+          "cid": 1097,
+          "lid": 14319,
+          "latitude": 19.436423400000002,
+          "longitude": -99.1902121,
+          "radius": 4150
+        },
+        {
+          "id": 439274721,
+          "email": "0c36c541fcb92d777e6bf0e9a8f65ba0@gmail.com",
+          "cid": 1098,
+          "lid": 14319,
+          "latitude": 19.429214605601434,
+          "longitude": -99.1917201,
+          "radius": 0
+        },
+        {
+          "id": 439801206,
+          "email": "77ccc1ab24f4092953d73012599c48aa@cyterentayvende.com",
+          "cid": 1097,
+          "lid": 14290,
+          "latitude": 19.43806580560419,
+          "longitude": -99.194234,
+          "radius": 250
+        }
+      ] 
+    }
+    </script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=[API_KEY]&libraries=places&callback=initService"
+        async defer></script>
+  </body>
+</html>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple Map</title>
+    <title>Mexico Search</title>
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
@@ -61,7 +61,7 @@
         font-weight: 300;
       }
 
-      #pac-input {
+      #input {
         background-color: #fff;
         font-family: Roboto;
         font-size: 15px;
@@ -72,7 +72,7 @@
         width: 400px;
       }
 
-      #pac-input:focus {
+      #input:focus {
         border-color: #4d90fe;
       }
 
@@ -86,63 +86,206 @@
     </style>
   </head>
   <body>
-      <div class="pac-card" id="pac-card">
-          <div>
-            <div id="title">Autocomplete search</div>
-          </div>
-          <div id="pac-container">
-            <input id="pac-input" type="text" placeholder="Enter a location">
-          </div>
+    <div class="pac-card" id="pac-card">
+        <div>
+          <div id="title">Custom Search</div>
         </div>
+        <div id="pac-container">
+          <input id="input" type="text" placeholder="Enter a location">
+        </div>
+        <div>
+          <ul id="results"></ul>
+        </div>
+    </div>
     <div id="map"></div>
-
     <script>
-      var country = 'mx'; //limiting the search to only places in this country (Mexico)
-      var countryRestrict = {'country' : country};
       function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 23.634501, lng: -102.552784},
           zoom: 7
         });
+
         var card = document.getElementById('pac-card');
-        var input = document.getElementById('pac-input');
+        var input = document.getElementById('input');
+        var list = document.getElementById('results');
 
         map.controls[google.maps.ControlPosition.TOP_RIGHT].push(card);
-        
-        //var autocomplete_service = new google.maps.places.AutocompleteService();
-        //autocomplete input
-        var autocomplete = new google.maps.places.Autocomplete(input, {
-          componentRestrictions: countryRestrict,
-          strictBounds: true //binds the autocomplete to the places in the map view
-        });
-        autocomplete.bindTo('bounds', map);
-        var marker = new google.maps.Marker({
-          map: map,
-          anchorPoint: new google.maps.Point(0, -29)
-        });
 
-/*        map.addListener('bounds_changged', () => {
-          map
-        })*/
-        autocomplete.addListener('place_changed', () => {
-          marker.setVisible(false);
-          var place = autocomplete.getPlace();
-          if (!place.geometry) {
-            window.alert("No details available for: '" + place.name + "'");
-            return ;
+        //services intialized
+        var service = new google.maps.places.AutocompleteService();
+        var details_service = new google.maps.places.PlacesService(map);
+
+        //locations around Mexico
+        var locations = setupSearchEnvironment();
+
+        //debugging search environment
+        /*for (var city in locations) {
+          var Circle = new google.maps.Circle({
+              strokeColor: '#FF0000',
+              strokeOpacity: 0.8,
+              strokeWeight: 2,
+              fillColor: '#FF0000',
+              fillOpacity: 0.35,
+              map: map,
+              center: locations[city].center,
+              radius: locations[city].radius
+          });
+        }*/
+
+        //event listener when user clicks a list element
+        list.addEventListener("click", (e) => {
+          if (e.target && e.target.nodeName == "LI"){
+            clear_suggestionlist();
+
+            input.value = e.target.innerHTML;
+            details_service.getDetails({placeId: e.target.getAttribute('placeid')}, (place_selected, status) => {
+              if (!place_selected.geometry) {
+                window.alert("No details available for: '" + place_selected.name + "'");
+                return ;
+              }
+              if (place_selected.geometry.viewport) {
+                map.fitBounds(place_selected.geometry.viewport);
+              } else {
+                map.setCenter(place_selected.geometry.location);
+                map.setZoom(17);
+              }
+            });
           }
-          if (place.geometry.viewport) {
-            map.fitBounds(place.geometry.viewport);
-          } else {
-            map.setCenter(place.geometry.location);
-            map.setZoom(17);
+        }, false);
+
+        //event listener triggering when user input changes
+        input.addEventListener("input", () => {
+          
+          clear_suggestionlist();
+
+          var country = 'mx';
+          var countryRestrict = {'country' : country};
+
+          var requests = getLocationsRequests(input, locations, countryRestrict);
+
+          var suggestions = {};
+          if (input.value.length != 0){
+            getsuggestions(service, suggestions, requests.request4);
+            getsuggestions(service, suggestions,requests.request2);
+            getsuggestions(service, suggestions, requests.request3);
+            getsuggestions(service, suggestions, requests.request1);
+            getsuggestions(service, suggestions, requests.request5);
           }
-          marker.setPosition(place.geometry.location);
-          marker.setVisible(true);
         });
       }
+
+      function setupSearchEnvironment()
+      {
+        var location1 = new google.maps.LatLng(29.112720, -111.660448); //Hermosillo,Mx
+        var location2 = new google.maps.LatLng(25.910931, -100.859556); //Monterrey, Mx
+        var location3 = new google.maps.LatLng(20.730237, -103.356199); //Guadalajara, Mx
+        var location4 = new google.maps.LatLng(19.237409, -98.817430); // Mexico City, Mx
+        var location5 = new google.maps.LatLng(19.203276, -90.325645); //Campeche, Mx
+
+        var locations = {
+          hermosillo : {
+            center: location1,
+            radius: 600000
+          },
+          monterrey : {
+            center: location2,
+            radius: 600000
+          },
+          guadalajara : {
+            center: location3,
+            radius: 250000
+          },
+          mexicocity : {
+            center: location4,
+            radius: 500000
+          },
+          yucatan : {
+            center: location5,
+            radius: 500000
+          }
+        }
+
+        return locations;
+      }
+
+      function getLocationsRequests(input, locations, countryRestrict)
+      {
+        return {
+            request4 : {
+              input: input.value,
+              location: locations.hermosillo.center,
+              radius: 600000,
+              types: ['(regions)'],
+              componentRestrictions: countryRestrict
+            },
+            request2 : {
+              input: input.value,
+              location: locations.monterrey.center,
+              radius: 600000,
+              types: ['(regions)'],
+              componentRestrictions: countryRestrict
+            },
+            request3 : {
+              input: input.value,
+              location: locations.guadalajara.center,
+              radius: 250000,
+              types: ['(regions)'],
+              componentRestrictions: countryRestrict
+            },
+            request1 : {
+              input: input.value,
+              location: locations.mexicocity.center,
+              radius: 500000,
+              types: ['(regions)'],
+              componentRestrictions: countryRestrict
+            },
+            request5 : {
+              input: input.value,
+              location: locations.yucatan.center,
+              radius: 500000,
+              types: ['(regions)'],
+              componentRestrictions: countryRestrict
+            }
+          }
+      }
+      //clears list of suggestions (if any)
+      function clear_suggestionlist()
+      {
+        var results = document.getElementById('results');
+
+        while (results.firstChild){
+          results.removeChild(results.firstChild);
+        }
+      }
+
+      //retrieve suggestions with given parameters in request
+      function getsuggestions(service, suggestions, request){
+        var place;
+
+        service.getPlacePredictions(request, (results, status) => {
+          if (status != google.maps.places.PlacesServiceStatus.OK) {
+            return 0;
+          }
+          for (var i = 0; i < results.length; i++){
+            place = results[i];
+            if (!suggestions[place.description]){
+              suggestions[place.description] = place.description;
+              displaysuggestion(place);
+            }
+          }
+        });
+      }
+
+      //adds the place to the suggestions list by creating a <li> element to the html
+      function displaysuggestion(place){
+        var li = document.createElement('li');
+
+        li.setAttribute("placeid", place.place_id);
+        li.appendChild(document.createTextNode(place.description));
+        document.getElementById('results').appendChild(li);
+      }
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzynaY7B9KXAxdWlHUrJcj9U81GAXu_ag&libraries=places&callback=initMap"
+    <script src="https://maps.googleapis.com/maps/api/js?key=[API_KEY]&libraries=places&callback=initMap"
     async defer></script>
   </body>
 </html>
